@@ -1,0 +1,227 @@
+{% extends "master.html" %}
+{% block title %}Posts | Posts {% endblock %}
+{% block content %}
+    <div id="newPost" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">NEW POST</h4>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-group">
+                <label for="recipient-name" class="form-control-label">Title:</label>
+                <input type="text" class="form-control" id="post_title">
+              </div>
+              <div class="form-group">
+                <label for="message-text" class="form-control-label">Content:</label>
+                <textarea class="form-control" id="post_content"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">CLOSE</button>
+            <button type="button" class="btn btn-success" id="create_post">CREATE</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- Page Content -->
+    <div class="container">
+
+        <div class="row">
+
+            <!-- Blog Post Content Column -->
+            <div class="col-lg-8">
+                <!-- Blog Post -->
+
+                <!-- Title -->
+                <h1 id="#title"></h1>
+
+                <!-- Author -->
+                <p class="lead">
+                    by <a href="#" class="posted-by"></a>
+                </p>
+
+                <hr>
+
+                <!-- Date/Time -->
+                <p class='posted-at'><span class="glyphicon glyphicon-time"></span></p>
+                <hr>
+                <!-- Preview Image -->
+                <img class="img-responsive" src="http://placehold.it/900x300" alt="">
+                <hr>
+                <!-- Post Content -->
+                <p class='content'></p>
+                <hr>
+                <!-- Blog Comments -->
+
+                <!-- Comments Form -->
+                <div class="well">
+                    <h4>Leave a Comment:</h4>
+                    <div role="form" action="#">
+                        <div class="form-group">
+                            <textarea class="form-control" rows="3" id="text_comment"></textarea>
+                            <input type="hidden" value="" id="post_id">
+                        </div>
+                        <button class="btn btn-primary post-comment">Submit</button>
+                    </div>
+                </div>
+                <div class="comments">
+                </div>
+            </div>
+            <div>
+                <button class="btn btn-success" data-toggle="modal" data-target="#newPost">NEW POST</button> &nbsp;&nbsp;
+                <button class="btn btn-primary prev-post"><< PREV POST</button> &nbsp;&nbsp;
+                <button class="btn btn-primary next-post">NEXT POST >></button>
+            </div>
+            
+        </div>
+        <!-- /.row -->
+    <!-- /.container -->
+    </div>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+    var next_url = '';
+    var previous = ''
+    
+    $.ajax({
+        method:'GET',
+        url:'/api/v1/posts',
+        success: function(data){
+            console.log(data);
+            next_url = data.next;
+            previous = data.previous;
+            if (data.next == null){
+                $('.next-post').attr("disabled",true);
+            } else {
+                $('.next-post').attr("disabled",false);
+            }
+            if (data.previous == null){
+                $('.prev-post').attr("disabled",true);
+            } else {
+                $('.prev-post').attr("disabled",false);
+            }            
+            $('h1').html(data.results[0].title);
+            $('#post_id').val(data.results[0].id);
+            $('.content').html(data.results[0].body);
+            $('.posted-at').html("Posted on " + new Date(Date.parse(data.results[0].created)));
+            $('.posted-by').html(data.results[0].added_by.username);
+
+            $.each(data.results[0].comments, function(index, value){
+                comment = "<hr><div class='media'>"
+                            +"<a class='pull-left' href='#'>"
+                                +"<img class='media-object' src='http://placehold.it/64x64' alt=''>"
+                            +"</a>"
+                            +"<div class='media-body'>"
+                                +"<h4 class='media-heading'>"+ value.added_by.username + " "
+                                +"<small>"+ new Date(Date.parse(value.created)) +"</small></h4>"
+                                + value.comment
+                                +"</div>"
+                        +"</div>";
+                $('.comments').append(comment);                
+            });
+
+        }
+    });
+
+    var getPost = function(url){
+        $.ajax({
+            method:'GET',
+            url:url,
+            success: function(data){
+                console.log(data);
+                next_url = data.next;
+                previous = data.previous;
+                if (data.next == null){
+                    $('.next-post').attr("disabled",true);
+                } else {
+                    $('.next-post').attr("disabled",false);
+                }
+                if (data.previous == null){
+                    $('.prev-post').attr("disabled",true);
+                } else {
+                    $('.prev-post').attr("disabled",false);
+                }               
+                
+                $('h1').html(data.results[0].title);
+                $('#post_id').val(data.results[0].id);
+                $('.content').html(data.results[0].body);
+                $('.posted-at').html("Posted on " + new Date(Date.parse(data.results[0].created)));
+                $('.posted-by').html(data.results[0].added_by.username);
+
+                $.each(data.results[0].comments, function(index, value){
+                    comment = "<hr><div class='media'>"
+                                +"<a class='pull-left' href='#'>"
+                                    +"<img class='media-object' src='http://placehold.it/64x64' alt=''>"
+                                +"</a>"
+                                +"<div class='media-body'>"
+                                    +"<h4 class='media-heading'>"+ value.added_by.username + " "
+                                    +"<small>"+ new Date(Date.parse(value.created)) +"</small></h4>"
+                                    + value.comment
+                                    +"</div>"
+                            +"</div>";
+                    $('.comments').append(comment);
+                });
+
+            }
+        });        
+    };
+
+    $('.next-post').click(function(){
+        $('.comments').html('');
+        getPost(next_url);
+    });
+    $('.prev-post').click(function(){
+        $('.comments').html('');
+        getPost(previous);
+    });
+
+    $('.post-comment').click(function(){
+        var comment = $('#text_comment').val();
+        var post_id = $('#post_id').val();
+        var user = {{ request.user.id }};
+
+        $.ajax({
+            method:'POST',
+            url: '/api/v1/comments/',
+            data:{'comment': comment, 'post':post_id, 'added_by':user},
+            success: function(data){
+                comment = "<hr><div class='media'>"
+                            +"<a class='pull-left' href='#'>"
+                                +"<img class='media-object' src='http://placehold.it/64x64' alt=''>"
+                            +"</a>"
+                            +"<div class='media-body'>"
+                                +"<h4 class='media-heading'>"+ data.added_by + " "
+                                +"<small>"+ new Date(Date.parse(data.created)) +"</small></h4>"
+                                + data.comment
+                                +"</div>"
+                        +"</div>";
+                $('.comments').append(comment);
+                $('#text_comment').val('')
+            }
+        });
+    });
+
+    $('#create_post').click(function(){
+        var post_content = $('#post_content').val();
+        var post_title = $('#post_title').val();
+        var user = {{ request.user.id }};
+
+        $.ajax({
+            method:'POST',
+            url:'/api/v1/posts/',
+            data:{'title':post_title, 'body':post_content, 'added_by':user},
+            success:function(data){
+                $('#newPost').modal('hide');
+                window.location.reload();
+            }
+        });
+    });
+</script>
+{% endblock %}

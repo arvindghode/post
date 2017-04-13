@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}ChatApp | Login {% endblock %}
+{% block content %}
+<div class="container bootstrap snippet">
+    <div class="row">
+        <div class="">
+            <div class="portlet portlet-default">
+                <div class="portlet-heading">
+                    <div class="portlet-title">
+                        <h4><i class="fa fa-circle text-green"></i>Login</h4>
+                    </div>
+                    <div class="portlet-widgets">
+                        <div class="btn-group">
+                        </div>
+                        <span class="divider"></span>
+                        <a data-toggle="collapse" data-parent="#accordion" href="#chat"><i class="fa fa-chevron-down"></i></a>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="panel-collapse collapse in">
+                    <div class="portlet-footer" style="overflow-y: auto; width: auto;border-right: 1px solid black;">
+                        <form role="form" style="width: 30%" action="/login/" method="POST">
+                            {% csrf_token %}
+                            {% if error_message %}
+                            <div class="form-group">
+                                <p class='error-message'>{{ error_message }}</p>
+                            </div>
+                            {% endif %}
+                            <div class="form-group">
+                                <input class="form-control" type="text" name="username" placeholder="Username">
+                            </div>
+                            <div class="form-group">
+                                <input class="form-control" type="password" name="password" placeholder="Password">
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-default pull-right" id=send>Login</button>
+                                <div class="clearfix"></div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.col-md-4 -->
+    </div>
+</div>
+{% endblock %}
