@@ -1,1 +1,1 @@
-# post
+# Simple Blog Application.
